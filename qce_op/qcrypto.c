@@ -457,7 +457,7 @@ static void qcrypto_ce_set_bus(struct crypto_engine *pengine,
 
 	if (high_bw_req) {
 		pm_stay_awake(&pengine->pdev->dev);
-		ret = qce_enable_clk(pengine->qce);
+		ret = qcem_enable_clk(pengine->qce);
 		if (ret) {
 			pr_err("%s Unable enable clk\n", __func__);
 			goto clk_err;
@@ -467,7 +467,7 @@ static void qcrypto_ce_set_bus(struct crypto_engine *pengine,
 		if (ret) {
 			pr_err("%s Unable to set to high bandwidth\n",
 						__func__);
-			qce_disable_clk(pengine->qce);
+			qcem_disable_clk(pengine->qce);
 			goto clk_err;
 		}
 
@@ -481,7 +481,7 @@ static void qcrypto_ce_set_bus(struct crypto_engine *pengine,
 						__func__);
 			goto clk_err;
 		}
-		ret = qce_disable_clk(pengine->qce);
+		ret = qcem_disable_clk(pengine->qce);
 		if (ret) {
 			pr_err("%s Unable disable clk\n", __func__);
 			ret = msm_bus_scale_client_update_request(
@@ -972,7 +972,7 @@ static void _qcrypto_remove_engine(struct crypto_engine *pengine)
 
 	if (cp->total_units)
 		return;
-
+pr_warn("q_alg %u\n", (unsigned int)q_alg);
 	list_for_each_entry_safe(q_alg, n, &cp->alg_list, entry) {
 		if (q_alg->alg_type == QCRYPTO_ALG_CIPHER)
 			crypto_unregister_alg(&q_alg->cipher_alg);
@@ -997,7 +997,7 @@ static int _qcrypto_remove(struct platform_device *pdev)
 	_qcrypto_remove_engine(pengine);
 	mutex_unlock(&cp->engine_lock);
 	if (pengine->qce)
-		qce_close(pengine->qce);
+		qcem_close(pengine->qce);
 	kzfree(pengine);
 	return 0;
 }
@@ -1574,7 +1574,7 @@ static int _qcrypto_process_ablkcipher(struct crypto_engine *pengine,
 			(pengine->pcp->platform_support.hw_key_support == 0))
 		ret = -EINVAL;
 	else
-		ret =  qce_ablk_cipher_req(pengine->qce, &qreq);
+		ret =  qcem_ablk_cipher_req(pengine->qce, &qreq);
 
 	return ret;
 }
@@ -1631,7 +1631,7 @@ static int _qcrypto_process_ahash(struct crypto_engine *pengine,
 		ret = -1;
 		break;
 	};
-	ret =  qce_process_sha_req(pengine->qce, &sreq);
+	ret =  qcem_process_sha_req(pengine->qce, &sreq);
 
 	return ret;
 }
@@ -1831,7 +1831,7 @@ static int _qcrypto_process_aead(struct  crypto_engine *pengine,
 			req->dst = &rctx->dsg;
 		}
 	}
-	ret =  qce_aead_req(pengine->qce, &qreq);
+	ret =  qcem_aead_req(pengine->qce, &qreq);
 
 	return ret;
 }
@@ -4291,7 +4291,7 @@ static int  _qcrypto_probe(struct platform_device *pdev)
 	}
 
 	/* open qce */
-	handle = qce_open(pdev, &rc);
+	handle = qcem_open(pdev, &rc);
 	if (handle == NULL) {
 		kzfree(pengine);
 		platform_set_drvdata(pdev, NULL);
@@ -4328,7 +4328,7 @@ static int  _qcrypto_probe(struct platform_device *pdev)
 	cp->next_engine = pengine;
 	spin_unlock_irqrestore(&cp->lock, flags);
 
-// 	qce_hw_support(pengine->qce, &cp->ce_support);
+	qcem_hw_support(pengine->qce, &cp->ce_support);
 	if (cp->ce_support.bam)	 {
 		cp->platform_support.ce_shared = cp->ce_support.is_shared;
 		cp->platform_support.shared_ce_resource = 0;
@@ -4662,7 +4662,7 @@ err:
 	_qcrypto_remove_engine(pengine);
 	mutex_unlock(&cp->engine_lock);
 	if (pengine->qce)
-		qce_close(pengine->qce);
+		qcem_close(pengine->qce);
 	kzfree(pengine);
 	return rc;
 };

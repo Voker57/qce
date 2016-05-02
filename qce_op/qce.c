@@ -1935,7 +1935,7 @@ static int _ce_f8_setup(struct qce_device *pce_dev, struct qce_f8_req *req,
 struct qce_pm_table qce_pm_table = {NULL, NULL};
 EXPORT_SYMBOL(qce_pm_table);
 
-int qce_aead_req(void *handle, struct qce_req *q_req)
+int qcem_aead_req(void *handle, struct qce_req *q_req)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 	struct aead_request *areq = (struct aead_request *) q_req->areq;
@@ -2066,9 +2066,9 @@ bad:
 	}
 	return rc;
 }
-EXPORT_SYMBOL(qce_aead_req);
+EXPORT_SYMBOL(qcem_aead_req);
 
-int qce_ablk_cipher_req(void *handle, struct qce_req *c_req)
+int qcem_ablk_cipher_req(void *handle, struct qce_req *c_req)
 {
 	int rc = 0;
 	struct qce_device *pce_dev = (struct qce_device *) handle;
@@ -2157,9 +2157,9 @@ bad:
 	}
 	return rc;
 }
-EXPORT_SYMBOL(qce_ablk_cipher_req);
+EXPORT_SYMBOL(qcem_ablk_cipher_req);
 
-int qce_process_sha_req(void *handle, struct qce_sha_req *sreq)
+int qcem_process_sha_req(void *handle, struct qce_sha_req *sreq)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 	int rc;
@@ -2210,24 +2210,24 @@ bad:
 
 	return rc;
 }
-EXPORT_SYMBOL(qce_process_sha_req);
+EXPORT_SYMBOL(qcem_process_sha_req);
 
-int qce_enable_clk(void *handle)
+int qcem_enable_clk(void *handle)
 {
 	return 0;
 }
-EXPORT_SYMBOL(qce_enable_clk);
+EXPORT_SYMBOL(qcem_enable_clk);
 
-int qce_disable_clk(void *handle)
+int qcem_disable_clk(void *handle)
 {
 	return 0;
 }
-EXPORT_SYMBOL(qce_disable_clk);
+EXPORT_SYMBOL(qcem_disable_clk);
 
 /*
  * crypto engine open function.
  */
-void *qce_open(struct platform_device *pdev, int *rc)
+void *qcem_open(struct platform_device *pdev, int *rc)
 {
 	struct qce_device *pce_dev;
 	struct resource *resource;
@@ -2283,6 +2283,11 @@ void *qce_open(struct platform_device *pdev, int *rc)
 					"crypto_channels");
 	if (!resource) {
 		*rc = -ENXIO;
+		int i;
+		for (i = 0; i < pdev->num_resources; i++) {
+               struct resource *r = &pdev->resource[i];
+							 dev_err(pce_dev->pdev, "%s\n", r->name);
+		}
 		dev_err(pce_dev->pdev, "Missing DMA channel resource\n");
 		goto err;
 	};
@@ -2338,15 +2343,15 @@ void *qce_open(struct platform_device *pdev, int *rc)
 	return pce_dev;
 err:
 	if (pce_dev)
-		qce_close(pce_dev);
+		qcem_close(pce_dev);
 	return NULL;
 }
-EXPORT_SYMBOL(qce_open);
+EXPORT_SYMBOL(qcem_open);
 
 /*
  * crypto engine close function.
  */
-int qce_close(void *handle)
+int qcem_close(void *handle)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 
@@ -2365,9 +2370,9 @@ int qce_close(void *handle)
 	kfree(handle);
 	return 0;
 }
-EXPORT_SYMBOL(qce_close);
+EXPORT_SYMBOL(qcem_close);
 
-int qce_hw_support(void *handle, struct ce_hw_support *ce_support)
+int qcem_hw_support(void *handle, struct ce_hw_support *ce_support)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 
@@ -2391,7 +2396,7 @@ int qce_hw_support(void *handle, struct ce_hw_support *ce_support)
 	ce_support->bam = false;
 	return 0;
 }
-EXPORT_SYMBOL(qce_hw_support);
+EXPORT_SYMBOL(qcem_hw_support);
 
 int qce_f8_req(void *handle, struct qce_f8_req *req,
 			void *cookie, qce_comp_func_ptr_t qce_cb)

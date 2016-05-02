@@ -4413,7 +4413,7 @@ static int _qce_suspend(void *handle)
 	if (handle == NULL)
 		return -ENODEV;
 
-	qce_enable_clk(pce_dev);
+	qcem_enable_clk(pce_dev);
 
 	sps_pipe_info = pce_dev->ce_sps.consumer.pipe;
 	sps_disconnect(sps_pipe_info);
@@ -4421,7 +4421,7 @@ static int _qce_suspend(void *handle)
 	sps_pipe_info = pce_dev->ce_sps.producer.pipe;
 	sps_disconnect(sps_pipe_info);
 
-	qce_disable_clk(pce_dev);
+	qcem_disable_clk(pce_dev);
 	return 0;
 }
 
@@ -4435,7 +4435,7 @@ static int _qce_resume(void *handle)
 	if (handle == NULL)
 		return -ENODEV;
 
-	qce_enable_clk(pce_dev);
+	qcem_enable_clk(pce_dev);
 
 	sps_pipe_info = pce_dev->ce_sps.consumer.pipe;
 	sps_connect_info = &pce_dev->ce_sps.consumer.connect;
@@ -4457,14 +4457,14 @@ static int _qce_resume(void *handle)
 	pce_dev->ce_sps.out_transfer.user = pce_dev->ce_sps.producer.pipe;
 	pce_dev->ce_sps.in_transfer.user = pce_dev->ce_sps.consumer.pipe;
 
-	qce_disable_clk(pce_dev);
+	qcem_disable_clk(pce_dev);
 	return rc;
 }
 
 struct qce_pm_table qce_pm_table  = {_qce_suspend, _qce_resume};
 EXPORT_SYMBOL(qce_pm_table);
 
-int qce_aead_req(void *handle, struct qce_req *q_req)
+int qcem_aead_req(void *handle, struct qce_req *q_req)
 {
 	struct qce_device *pce_dev;
 	struct aead_request *areq;
@@ -4671,9 +4671,9 @@ bad:
 
 	return rc;
 }
-EXPORT_SYMBOL(qce_aead_req);
+EXPORT_SYMBOL(qcem_aead_req);
 
-int qce_ablk_cipher_req(void *handle, struct qce_req *c_req)
+int qcem_ablk_cipher_req(void *handle, struct qce_req *c_req)
 {
 	int rc = 0;
 	struct qce_device *pce_dev = (struct qce_device *) handle;
@@ -4777,9 +4777,9 @@ bad:
 	}
 	return rc;
 }
-EXPORT_SYMBOL(qce_ablk_cipher_req);
+EXPORT_SYMBOL(qcem_ablk_cipher_req);
 
-int qce_process_sha_req(void *handle, struct qce_sha_req *sreq)
+int qcem_process_sha_req(void *handle, struct qce_sha_req *sreq)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 	int rc;
@@ -4839,7 +4839,7 @@ bad:
 	}
 	return rc;
 }
-EXPORT_SYMBOL(qce_process_sha_req);
+EXPORT_SYMBOL(qcem_process_sha_req);
 
 int qce_f8_req(void *handle, struct qce_f8_req *req,
 			void *cookie, qce_comp_func_ptr_t qce_cb)
@@ -5177,14 +5177,16 @@ static int __qce_get_device_tree_data(struct platform_device *pdev,
 	} else {
 		pr_warn("bam_pipe_pair=0x%x", pce_dev->ce_sps.pipe_pair_index);
 	}
-	if (of_property_read_u32((&pdev->dev)->of_node,
-				"qcom,ce-device",
-				&pce_dev->ce_sps.ce_device)) {
-		pr_err("Fail to get CE device information.\n");
-		return -EINVAL;
-	} else {
-		pr_warn("ce-device =0x%x", pce_dev->ce_sps.ce_device);
-	}
+	
+	pce_dev->ce_sps.ce_device = 0;
+// 	if (of_property_read_u32((&pdev->dev)->of_node,
+// 				"qcom,ce-device",
+// 				&pce_dev->ce_sps.ce_device)) {
+// 		pr_err("Fail to get CE device information.\n");
+// 		return -EINVAL;
+// 	} else {
+// 		pr_warn("ce-device =0x%x", pce_dev->ce_sps.ce_device);
+// 	}
 
 	pce_dev->ce_sps.dest_pipe_index	= 2 * pce_dev->ce_sps.pipe_pair_index;
 	pce_dev->ce_sps.src_pipe_index	= pce_dev->ce_sps.dest_pipe_index + 1;
@@ -5326,7 +5328,7 @@ static void __qce_deinit_clk(struct qce_device *pce_dev)
 	}
 }
 
-int qce_enable_clk(void *handle)
+int qcem_enable_clk(void *handle)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 	int rc = 0;
@@ -5361,9 +5363,9 @@ int qce_enable_clk(void *handle)
 	}
 	return rc;
 }
-EXPORT_SYMBOL(qce_enable_clk);
+EXPORT_SYMBOL(qcem_enable_clk);
 
-int qce_disable_clk(void *handle)
+int qcem_disable_clk(void *handle)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 	int rc = 0;
@@ -5377,10 +5379,10 @@ int qce_disable_clk(void *handle)
 
 	return rc;
 }
-EXPORT_SYMBOL(qce_disable_clk);
+EXPORT_SYMBOL(qcem_disable_clk);
 
 /* crypto engine open function. */
-void *qce_open(struct platform_device *pdev, int *rc)
+void *qcem_open(struct platform_device *pdev, int *rc)
 {
 	struct qce_device *pce_dev;
 
@@ -5415,7 +5417,7 @@ void *qce_open(struct platform_device *pdev, int *rc)
 	if (*rc)
 		goto err_mem;
 
-	*rc = qce_enable_clk(pce_dev);
+	*rc = qcem_enable_clk(pce_dev);
 	if (*rc)
 		goto err_enable_clk;
 
@@ -5430,11 +5432,11 @@ void *qce_open(struct platform_device *pdev, int *rc)
 	if (*rc)
 		goto err;
 	qce_setup_ce_sps_data(pce_dev);
-	qce_disable_clk(pce_dev);
+	qcem_disable_clk(pce_dev);
 
 	return pce_dev;
 err:
-	qce_disable_clk(pce_dev);
+	qcem_disable_clk(pce_dev);
 
 err_enable_clk:
 	__qce_deinit_clk(pce_dev);
@@ -5450,17 +5452,17 @@ err_pce_dev:
 	kfree(pce_dev);
 	return NULL;
 }
-EXPORT_SYMBOL(qce_open);
+EXPORT_SYMBOL(qcem_open);
 
 /* crypto engine close function. */
-int qce_close(void *handle)
+int qcem_close(void *handle)
 {
 	struct qce_device *pce_dev = (struct qce_device *) handle;
 
 	if (handle == NULL)
 		return -ENODEV;
 
-	qce_enable_clk(pce_dev);
+	qcem_enable_clk(pce_dev);
 	qce_sps_exit(pce_dev);
 
 	if (pce_dev->iobase)
@@ -5469,21 +5471,21 @@ int qce_close(void *handle)
 		dma_free_coherent(pce_dev->pdev, pce_dev->memsize,
 				pce_dev->coh_vmem, pce_dev->coh_pmem);
 
-	qce_disable_clk(pce_dev);
+	qcem_disable_clk(pce_dev);
 	__qce_deinit_clk(pce_dev);
 
 	kfree(handle);
 
 	return 0;
 }
-EXPORT_SYMBOL(qce_close);
+EXPORT_SYMBOL(qcem_close);
 
 #define OTA_SUPPORT_MASK (1 << CRYPTO_ENCR_SNOW3G_SEL |\
 				1 << CRYPTO_ENCR_KASUMI_SEL |\
 				1 << CRYPTO_AUTH_SNOW3G_SEL |\
 				1 << CRYPTO_AUTH_KASUMI_SEL)
 
-int qce_hw_support(void *handle, struct ce_hw_support *ce_support)
+int qcem_hw_support(void *handle, struct ce_hw_support *ce_support)
 {
 	struct qce_device *pce_dev = (struct qce_device *)handle;
 
@@ -5526,7 +5528,7 @@ int qce_hw_support(void *handle, struct ce_hw_support *ce_support)
 	ce_support->ce_device = pce_dev->ce_sps.ce_device;
 	return 0;
 }
-EXPORT_SYMBOL(qce_hw_support);
+EXPORT_SYMBOL(qcem_hw_support);
 
 
 MODULE_LICENSE("GPL v2");

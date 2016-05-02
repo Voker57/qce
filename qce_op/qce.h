@@ -173,13 +173,13 @@ struct qce_pm_table {
 
 extern struct qce_pm_table qce_pm_table;
 
-void *qce_open(struct platform_device *pdev, int *rc);
-int qce_close(void *handle);
-int qce_aead_req(void *handle, struct qce_req *req);
-int qce_ablk_cipher_req(void *handle, struct qce_req *req);
-int qce_hw_support(void *handle, struct ce_hw_support *support);
-int qce_process_sha_req(void *handle, struct qce_sha_req *s_req);
-int qce_enable_clk(void *handle);
-int qce_disable_clk(void *handle);
+void *qcem_open(struct platform_device *pdev, int *rc);
+int qcem_close(void *handle);
+int qcem_aead_req(void *handle, struct qce_req *req);
+int qcem_ablk_cipher_req(void *handle, struct qce_req *req);
+int qcem_hw_support(void *handle, struct ce_hw_support *support);
+int qcem_process_sha_req(void *handle, struct qce_sha_req *s_req);
+int qcem_enable_clk(void *handle);
+int qcem_disable_clk(void *handle);
 
 #endif /* __CRYPTO_MSM_QCE_H */

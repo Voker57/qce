@@ -9,11 +9,11 @@ KBUILD_CFLAGS += -fno-pic
 PWD := $(shell pwd)
 
 
-obj-m += qce50.o
+# obj-m += qce40.o
 
 # 		obj-$(CONFIG_CRYPTO_DEV_QCE) += qce40.o
 
-# 		obj-$(CONFIG_CRYPTO_DEV_QCE) += qce.o
+ 		obj-m += qce50.o
 
 # ifeq ($(CONFIG_FIPS_ENABLE), y)
 # 	obj-$(CONFIG_CRYPTO_DEV_QCRYPTO) += qcrypto_fips.o
