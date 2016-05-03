@@ -972,7 +972,7 @@ static void _qcrypto_remove_engine(struct crypto_engine *pengine)
 
 	if (cp->total_units)
 		return;
-pr_warn("q_alg %u\n", (unsigned int)q_alg);
+
 	list_for_each_entry_safe(q_alg, n, &cp->alg_list, entry) {
 		if (q_alg->alg_type == QCRYPTO_ALG_CIPHER)
 			crypto_unregister_alg(&q_alg->cipher_alg);
@@ -4736,8 +4736,8 @@ static int  _qcrypto_suspend(struct platform_device *pdev, pm_message_t state)
 	if (ret)
 		return ret;
 	else {
-// 		if (qce_pm_table.suspend)
-// 			qce_pm_table.suspend(pengine->qce);
+		if (qce_pm_table.suspend)
+			qce_pm_table.suspend(pengine->qce);
 		return 0;
 	}
 }
@@ -4759,8 +4759,8 @@ static int  _qcrypto_resume(struct platform_device *pdev)
 	spin_lock_irqsave(&cp->lock, flags);
 	if (pengine->bw_state == BUS_SUSPENDED) {
 		spin_unlock_irqrestore(&cp->lock, flags);
-// 		if (qce_pm_table.resume)
-// 			qce_pm_table.resume(pengine->qce);
+		if (qce_pm_table.resume)
+			qce_pm_table.resume(pengine->qce);
 
 		spin_lock_irqsave(&cp->lock, flags);
 		pengine->bw_state = BUS_NO_BANDWIDTH;

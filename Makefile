@@ -11,6 +11,9 @@ iotest: iotest.c
 sha256sum_qce: sha256sum_qce.c
 	$(CC) -std=c99 -Wall -Wextra -Wfatal-errors -I kernel_obj/usr/include -I kernel_obj/include -I kernel_obj/ sha256sum_qce.c -o sha256sum_qce
 
+sha: sha.c sha.h
+	$(CC) -std=c99 -Wall -Wextra -Wfatal-errors -I kernel_obj/usr/include -I kernel_obj/include -I kernel_obj/ sha.c -o sha
+	
 aes_qce: aes_qce.c
 	$(CC) -std=c99 -Wall -Wextra -Wfatal-errors -I kernel_obj/usr/include -I kernel_obj/include -I kernel_obj/ aes_qce.c -o aes_qce
 	
@@ -20,6 +23,9 @@ sha256sum_cryptodev: sha256sum_cryptodev.c
 aes_cryptodev: aes_cryptodev.c
 	$(CC) -std=c99 -Wall -Wextra -Wfatal-errors -I kernel_obj/usr/include -I kernel_obj/include -I kernel_obj/ aes_cryptodev.c -o aes_cryptodev
 
+cryptodev_aes: cryptodev_aes.c
+	$(CC) -std=c99 -Wall -Wextra -Wfatal-errors -I kernel_obj/usr/include -I kernel_obj/include -I kernel_obj/ cryptodev_aes.c -o cryptodev_aes
+	
 clean:
 	$(MAKE) -C $(KERNEL_DIR) SUBDIRS=$(PWD) clean
 
