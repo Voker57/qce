@@ -95,7 +95,7 @@ static void qcedev_ce_high_bw_req(struct qcedev_control *podev,
 	mutex_lock(&qcedev_sent_bw_req);
 	if (high_bw_req) {
 		if (podev->high_bw_req_count == 0) {
-			ret = qce_enable_clk(podev->qce);
+			ret = qcem_enable_clk(podev->qce);
 			if (ret) {
 				pr_err("%s Unable enable clk\n", __func__);
 				mutex_unlock(&qcedev_sent_bw_req);
@@ -106,7 +106,7 @@ static void qcedev_ce_high_bw_req(struct qcedev_control *podev,
 			if (ret) {
 				pr_err("%s Unable to set to high bandwidth\n",
 							__func__);
-				ret = qce_disable_clk(podev->qce);
+				ret = qcem_disable_clk(podev->qce);
 				mutex_unlock(&qcedev_sent_bw_req);
 				return;
 			}
@@ -122,7 +122,7 @@ static void qcedev_ce_high_bw_req(struct qcedev_control *podev,
 				mutex_unlock(&qcedev_sent_bw_req);
 				return;
 			}
-			ret = qce_disable_clk(podev->qce);
+			ret = qcem_disable_clk(podev->qce);
 			if (ret) {
 				pr_err("%s Unable disable clk\n", __func__);
 				ret = msm_bus_scale_client_update_request(
@@ -260,10 +260,10 @@ static int qcedev_open(struct inode *inode, struct file *file)
 	struct qcedev_control *podev;
 
 	/* IF FIPS tests not passed, return error */
-	if (((g_fips140_status == FIPS140_STATUS_FAIL) ||
-		(g_fips140_status == FIPS140_STATUS_PASS_CRYPTO)) &&
-		is_fips_qcedev_integritytest_done)
-		return -ENXIO;
+// 	if (((g_fips140_status == FIPS140_STATUS_FAIL) ||
+// 		(g_fips140_status == FIPS140_STATUS_PASS_CRYPTO)) &&
+// 		is_fips_qcedev_integritytest_done)
+// 		return -ENXIO;
 
 	podev = qcedev_minor_to_control(MINOR(inode->i_rdev));
 	if (podev == NULL) {
@@ -486,7 +486,7 @@ static int start_cipher_req(struct qcedev_control *podev)
 	creq.qce_cb = qcedev_cipher_req_cb;
 	creq.areq = (void *)&qcedev_areq->cipher_req;
 	creq.flags = 0;
-	ret = qce_ablk_cipher_req(podev->qce, &creq);
+	ret = qcem_ablk_cipher_req(podev->qce, &creq);
 unsupported:
 	if (ret)
 		qcedev_areq->err = -ENXIO;
@@ -563,7 +563,7 @@ static int start_sha_req(struct qcedev_control *podev)
 	sreq.areq = (void *)&qcedev_areq->sha_req;
 	sreq.flags = 0;
 
-	ret = qce_process_sha_req(podev->qce, &sreq);
+	ret = qcem_process_sha_req(podev->qce, &sreq);
 
 	if (ret)
 		qcedev_areq->err = -ENXIO;
@@ -1929,56 +1929,56 @@ static long qcedev_ioctl(struct file *file, unsigned cmd, unsigned long arg)
 
 		/* This IOCTL call can be called only once
 		by FIPS Integrity test */
-	case QCEDEV_IOCTL_UPDATE_FIPS_STATUS:
-		{
-		enum fips_status status;
-		if (is_fips_qcedev_integritytest_done)
-			return -EPERM;
-
-		if (!access_ok(VERIFY_WRITE, (void __user *)arg,
-			sizeof(enum fips_status)))
-			return -EFAULT;
-
-		if (__copy_from_user(&status, (void __user *)arg,
-			sizeof(enum fips_status)))
-			return -EFAULT;
-
-		g_fips140_status = _fips_update_status(status);
-		pr_info("qcedev: FIPS140-2 Global status flag: %d\n",
-			g_fips140_status);
-		is_fips_qcedev_integritytest_done = true;
-
-		if (g_fips140_status == FIPS140_STATUS_FAIL) {
-			pr_info("qcedev: FIPS140-2 Integrity test failed\n");
-			break;
-		}
-
-		if (!(_do_msm_fips_drbg_init(drbg_call_back)) &&
-			(g_fips140_status != FIPS140_STATUS_NA))
-			g_fips140_status = FIPS140_STATUS_PASS;
-		}
-
-		pr_info("qcedev: FIPS140-2 Global status flag: %d\n",
-			g_fips140_status);
-
-		break;
-
-		/* Read only IOCTL call to read the
-		current FIPS140-2 Status */
-	case QCEDEV_IOCTL_QUERY_FIPS_STATUS:
-		{
-		enum fips_status status;
-		if (!access_ok(VERIFY_WRITE, (void __user *)arg,
-			sizeof(enum fips_status)))
-			return -EFAULT;
-
-		status = g_fips140_status;
-		if (__copy_to_user((void __user *)arg, &status,
-			sizeof(enum fips_status)))
-			return -EFAULT;
-
-		}
-		break;
+// 	case QCEDEV_IOCTL_UPDATE_FIPS_STATUS:
+// 		{
+// 		enum fips_status status;
+// 		if (is_fips_qcedev_integritytest_done)
+// 			return -EPERM;
+// 
+// 		if (!access_ok(VERIFY_WRITE, (void __user *)arg,
+// 			sizeof(enum fips_status)))
+// 			return -EFAULT;
+// 
+// 		if (__copy_from_user(&status, (void __user *)arg,
+// 			sizeof(enum fips_status)))
+// 			return -EFAULT;
+// 
+// 		g_fips140_status = _fips_update_status(status);
+// 		pr_info("qcedev: FIPS140-2 Global status flag: %d\n",
+// 			g_fips140_status);
+// 		is_fips_qcedev_integritytest_done = true;
+// 
+// 		if (g_fips140_status == FIPS140_STATUS_FAIL) {
+// 			pr_info("qcedev: FIPS140-2 Integrity test failed\n");
+// 			break;
+// 		}
+// 
+// 		if (!(_do_msm_fips_drbg_init(drbg_call_back)) &&
+// 			(g_fips140_status != FIPS140_STATUS_NA))
+// 			g_fips140_status = FIPS140_STATUS_PASS;
+// 		}
+// 
+// 		pr_info("qcedev: FIPS140-2 Global status flag: %d\n",
+// 			g_fips140_status);
+// 
+// 		break;
+// 
+// 		/* Read only IOCTL call to read the
+// 		current FIPS140-2 Status */
+// 	case QCEDEV_IOCTL_QUERY_FIPS_STATUS:
+// 		{
+// 		enum fips_status status;
+// 		if (!access_ok(VERIFY_WRITE, (void __user *)arg,
+// 			sizeof(enum fips_status)))
+// 			return -EFAULT;
+// 
+// 		status = g_fips140_status;
+// 		if (__copy_to_user((void __user *)arg, &status,
+// 			sizeof(enum fips_status)))
+// 			return -EFAULT;
+// 
+// 		}
+// 		break;
 	default:
 		return -ENOTTY;
 	}
@@ -2005,7 +2005,7 @@ static int qcedev_probe(struct platform_device *pdev)
 	tasklet_init(&podev->done_tasklet, req_done, (unsigned long)podev);
 
 	/* open qce */
-	handle = qce_open(pdev, &rc);
+	handle = qcem_open(pdev, &rc);
 	if (handle == NULL) {
 		platform_set_drvdata(pdev, NULL);
 		return rc;
@@ -2016,7 +2016,7 @@ static int qcedev_probe(struct platform_device *pdev)
 	platform_set_drvdata(pdev, podev);
 
 	rc = misc_register(&podev->miscdevice);
-	qce_hw_support(podev->qce, &podev->ce_support);
+	qcem_hw_support(podev->qce, &podev->ce_support);
 	if (podev->ce_support.bam) {
 		podev->platform_support.ce_shared = 0;
 		podev->platform_support.shared_ce_resource = 0;
@@ -2059,19 +2059,19 @@ static int qcedev_probe(struct platform_device *pdev)
  * FIPS140-2 Known Answer Tests:
  * IN case of any failure, do not Init the module
  */
-	is_fips_qcedev_integritytest_done = false;
-	if (g_fips140_status != FIPS140_STATUS_NA) {
-		if (_fips_qcedev_cipher_selftest(&qce_dev[0]) ||
-			_fips_qcedev_sha_selftest(&qce_dev[0])) {
-			pr_err("qcedev: FIPS140-2 Known Answer Tests : Failed\n");
-			panic("SYSTEM CAN NOT BOOT !!!");
-			rc = -1;
-		} else {
-			pr_info("qcedev: FIPS140-2 Known Answer Tests : Successful\n");
-			rc = 0;
-		}
-	} else
-		pr_info("qcedev: FIPS140-2 Known Answer Tests : Skipped\n");
+// 	is_fips_qcedev_integritytest_done = false;
+// 	if (g_fips140_status != FIPS140_STATUS_NA) {
+// 		if (_fips_qcedev_cipher_selftest(&qce_dev[0]) ||
+// 			_fips_qcedev_sha_selftest(&qce_dev[0])) {
+// 			pr_err("qcedev: FIPS140-2 Known Answer Tests : Failed\n");
+// 			panic("SYSTEM CAN NOT BOOT !!!");
+// 			rc = -1;
+// 		} else {
+// 			pr_info("qcedev: FIPS140-2 Known Answer Tests : Successful\n");
+// 			rc = 0;
+// 		}
+// 	} else
+// 		pr_info("qcedev: FIPS140-2 Known Answer Tests : Skipped\n");
 
 	if (rc >= 0)
 		return 0;
@@ -2082,7 +2082,7 @@ static int qcedev_probe(struct platform_device *pdev)
 err:
 
 	if (handle)
-		qce_close(handle);
+		qcem_close(handle);
 	platform_set_drvdata(pdev, NULL);
 	podev->qce = NULL;
 	podev->pdev = NULL;
@@ -2097,7 +2097,7 @@ static int qcedev_remove(struct platform_device *pdev)
 	if (!podev)
 		return 0;
 	if (podev->qce)
-		qce_close(podev->qce);
+		qcem_close(podev->qce);
 
 	if (podev->platform_support.bus_scale_table != NULL)
 		msm_bus_scale_unregister_client(podev->bus_scale_handle);
@@ -2126,7 +2126,7 @@ static int qcedev_suspend(struct platform_device *pdev, pm_message_t state)
 						__func__);
 			goto suspend_exit;
 		}
-		ret = qce_disable_clk(podev->qce);
+		ret = qcem_disable_clk(podev->qce);
 		if (ret) {
 			pr_err("%s Unable disable clk\n", __func__);
 			ret = msm_bus_scale_client_update_request(
@@ -2154,7 +2154,7 @@ static int qcedev_resume(struct platform_device *pdev)
 
 	mutex_lock(&qcedev_sent_bw_req);
 	if (podev->high_bw_req_count) {
-		ret = qce_enable_clk(podev->qce);
+		ret = qcem_enable_clk(podev->qce);
 		if (ret) {
 			pr_err("%s Unable enable clk\n", __func__);
 			goto resume_exit;
@@ -2164,7 +2164,7 @@ static int qcedev_resume(struct platform_device *pdev)
 		if (ret) {
 			pr_err("%s Unable to set to high bandwidth\n",
 						__func__);
-			ret = qce_disable_clk(podev->qce);
+			ret = qcem_disable_clk(podev->qce);
 			if (ret)
 				pr_err("%s Unable enable clk\n",
 					__func__);
@@ -2189,7 +2189,7 @@ static struct platform_driver qcedev_plat_driver = {
 	.suspend = qcedev_suspend,
 	.resume = qcedev_resume,
 	.driver = {
-		.name = "qce",
+		.name = "qcedev",
 		.owner = THIS_MODULE,
 		.of_match_table = qcedev_match,
 	},

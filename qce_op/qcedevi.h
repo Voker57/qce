@@ -15,11 +15,13 @@
 #ifndef __CRYPTO_MSM_QCEDEVI_H
 #define __CRYPTO_MSM_QCEDEVI_H
 
+#undef CONFIG_FIPS_ENABLE
+
 #include <linux/interrupt.h>
 #include <linux/miscdevice.h>
 #include <crypto/hash.h>
 #include <linux/platform_data/qcom_crypto_device.h>
-#include <linux/fips_status.h>
+// #include <linux/fips_status.h>
 #include "qce.h"
 
 #define CACHE_LINE_SIZE 32
@@ -154,19 +156,19 @@ static inline enum fips_status _fips_update_status(enum fips_status status)
 
 #else
 
-static inline int _fips_qcedev_cipher_selftest(struct qcedev_control *podev)
-{
-	return 0;
-}
-static inline int _fips_qcedev_sha_selftest(struct qcedev_control *podev)
-{
-	return 0;
-}
-
-static inline enum fips_status _fips_update_status(enum fips_status status)
-{
-	return FIPS140_STATUS_NA;
-}
+// static inline int _fips_qcedev_cipher_selftest(struct qcedev_control *podev)
+// {
+// 	return 0;
+// }
+// static inline int _fips_qcedev_sha_selftest(struct qcedev_control *podev)
+// {
+// 	return 0;
+// }
+// 
+// static inline enum fips_status _fips_update_status(enum fips_status status)
+// {
+// 	return FIPS140_STATUS_NA;
+// }
 
 #endif  /* CONFIG_FIPS_ENABLE */
 
