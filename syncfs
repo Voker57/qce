@@ -1,0 +1,8 @@
+#!/bin/sh
+mkdir -p tmpfs
+sudo mount mmc tmpfs
+rsync -av --delete rootfs/ tmpfs/
+sudo umount tmpfs
+adbpush mmc
+echo "type\ndd if=/data/local/tmp/mmc of=/dev/block/mmcblk1"
+adb shell
