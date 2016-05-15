@@ -14,6 +14,7 @@ PWD := $(shell pwd)
 # 		obj-$(CONFIG_CRYPTO_DEV_QCE) += qce40.o
 
  		obj-m += qce50.o
+ 		obj-m += qcedev.o
 
 # ifeq ($(CONFIG_FIPS_ENABLE), y)
 # 	obj-$(CONFIG_CRYPTO_DEV_QCRYPTO) += qcrypto_fips.o
