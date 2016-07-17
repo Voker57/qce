@@ -1,16 +1,32 @@
 #include <stdint.h>
-#include <openssl/rand.h>
 #include <stdio.h>
+
+unsigned seed = 0;
+
+int rand()
+{
+	if(seed==0)
+		seed = time(NULL);
+  seed = (1103515245 * seed + 12345) % 4294967296;
+  return seed;
+}
 
 int main(int argc, char *argv[])
 {
-	FILE* f = fopen(argv[1], "w");
-	int filesize = atoi(argv[2]);
-	void *randz = malloc(filesize);
+	FILE* f = fopen("/meat", "w");
 	char chars[] = { '-', '\\', '|','/','-','\\','|','/' };
 	int offset = 0;
 	int i;
-	RAND_bytes(randz, filesize);
-	fwrite(randz, filesize, 1, f);
+	unsigned *rbytes = malloc(sizeof(unsigned));
+	
+	for(i=0; i < 9e8 / 4; i++)
+	{
+		*rbytes = rand();
+		fwrite(rbytes, sizeof(unsigned), 1, f);
+		if (i % 1000000 == 0) {
+			printf("\r%d       ", (int)(i / (9e8/4) * 100));
+			fflush(stdout);
+		}
+	}
 	fclose(f);
 }
